@@ -387,10 +387,11 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
   std::string line;
+  std::string seq;
   std::string alphabet;
   std::vector<peptide> peplist1;
   std::vector<peptide> peplist2;
-
+  int trust4flag = 1;
   omp_set_num_threads(n_threads);
 
   alphabet = "ARNDCQEGHILKMFPSTWYV";
@@ -412,7 +413,37 @@ int main(int argc, char *argv[]) {
       }
       peplist1.push_back({*it, int((*it).length()), -99.9, int_vec});
     }
-  } else {
+  }
+
+  else if( trust4flag ){
+
+    // text file input
+    std::ifstream file1(in_file);
+    getline(file1, line); // skips header 
+    while (getline(file1, line)) {
+      std::istringstream is( line );
+      std::string skip;
+      is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
+      std::vector<int> int_vec;
+      for (int i = 0; i < seq.length(); i++) {
+        if (alphabet.find(seq[i]) == -1) {
+          std::cerr << "Invalid amino acid found in " << seq << " at position "
+                    << i + 1 << std::endl;
+          std::cerr <<"Skipping" <<std::endl;
+          // return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
+        }
+      }
+
+      if( trimming ) // removes flanking residues (C and F or W). Works for text input, not AIRR.
+        seq = trim( seq );
+
+      peplist1.push_back({seq, int(seq.length()), -99.9, int_vec});
+    }
+    file1.close();
+
+  }
+
+  else {
     // text file input
     std::ifstream file1(in_file);
     while (getline(file1, line)) {
