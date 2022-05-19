@@ -318,35 +318,39 @@ int main(int argc, char *argv[]) {
   int thresh_flag = -1;
   int airr_flag = -1;
   int trimming = true;
+  int trust4flag = false;
   // Command line argument parsing
-  while ((opt = getopt(argc, argv, "akt:i:s:d:")) != -1) {
+  while ((opt = getopt(argc, argv, "rakt:i:s:d:")) != -1) {
     switch (opt) {
-    case 't':
-      n_threads = std::stoi(optarg);
-      t_flag = 1;
-      break;
-    case 'a':
-      airr_flag = 1;
-      break;
-    case 'i':
-      in_file = optarg;
-      i_flag = 1;
-      break;
-    case 's':
-      threshold = std::stof(optarg);
-      thresh_flag = 1;
-      break;
-    case 'd':
-      iedb_file = optarg;
-      break;
-    case 'k':
-      trimming = false;
-      break;
-
-    default:
-      std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
-                   "score_threshold -d /path/to/database"
-                << std::endl;
+      case 't':
+        n_threads = std::stoi(optarg);
+        t_flag = 1;
+        break;
+      case 'a':
+        airr_flag = 1;
+        break;
+      case 'i':
+        in_file = optarg;
+        i_flag = 1;
+        break;
+      case 's':
+        threshold = std::stof(optarg);
+        thresh_flag = 1;
+        break;
+      case 'd':
+        iedb_file = optarg;
+        break;
+      case 'k':
+        trimming = false;
+        break;
+      case 'r':
+        trust4flag = true;
+        break;
+        
+      default:
+        std::cerr << "Usage: ./tcrmatch -i infile_name.txt -a -t num_threads -s "
+                    "score_threshold -d /path/to/database -k -r"
+                  << std::endl;
       return EXIT_FAILURE;
     }
   }
@@ -391,7 +395,7 @@ int main(int argc, char *argv[]) {
   std::string alphabet;
   std::vector<peptide> peplist1;
   std::vector<peptide> peplist2;
-  int trust4flag = 1;
+  
   omp_set_num_threads(n_threads);
 
   alphabet = "ARNDCQEGHILKMFPSTWYV";
