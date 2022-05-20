@@ -317,8 +317,8 @@ int main(int argc, char *argv[]) {
   int t_flag = -1;
   int thresh_flag = -1;
   int airr_flag = -1;
-  int trimming = true;
-  int trust4flag = false;
+  bool trimming = true;
+  bool trust4flag = false;
   // Command line argument parsing
   while ((opt = getopt(argc, argv, "rakt:i:s:d:")) != -1) {
     switch (opt) {
@@ -429,14 +429,20 @@ int main(int argc, char *argv[]) {
       std::string skip;
       is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
       std::vector<int> int_vec;
+      bool invalid_char_found = false;
       for (int i = 0; i < seq.length(); i++) {
         if (alphabet.find(seq[i]) == -1) {
-          std::cerr << "Invalid amino acid found in " << seq << " at position "
-                    << i + 1 << std::endl;
-          std::cerr <<"Skipping" <<std::endl;
           // return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
-          continue;
+          invalid_char_found = true;
+          if( invalid_char_found )
+            break;
         }
+      }
+
+      if( invalid_char_found ) {
+        std::cerr << "Invalid amino acid found in " << seq <<std::endl;
+        std::cerr <<"Skipping" <<std::endl;
+        continue;
       }
 
       if( trimming ) // removes flanking residues (C and F or W). Works for text input, not AIRR.
@@ -445,7 +451,10 @@ int main(int argc, char *argv[]) {
       peplist1.push_back({seq, int(seq.length()), -99.9, int_vec});
     }
     file1.close();
-
+  std::cout << peplist1.size() <<std::endl; 
+  // for(int i=0 ; i<peplist1.size(); i++)
+  //   std::cout << peplist1[i].seq;
+  exit(0);
   }
 
   else {
