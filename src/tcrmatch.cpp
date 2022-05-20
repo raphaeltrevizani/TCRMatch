@@ -435,6 +435,7 @@ int main(int argc, char *argv[]) {
                     << i + 1 << std::endl;
           std::cerr <<"Skipping" <<std::endl;
           // return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
+          continue;
         }
       }
 
