@@ -430,12 +430,12 @@ int main(int argc, char *argv[]) {
       is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
       std::vector<int> int_vec;
       bool invalid_char_found = false;
+
       for (int i = 0; i < seq.length(); i++) {
         if (alphabet.find(seq[i]) == -1) {
           // return EXIT_FAILURE; // TRUST4 contains many illegal chars. Skipping them for now.
           invalid_char_found = true;
-          if( invalid_char_found )
-            break;
+          break;
         }
       }
 
@@ -451,9 +451,10 @@ int main(int argc, char *argv[]) {
       peplist1.push_back({seq, int(seq.length()), -99.9, int_vec});
     }
     file1.close();
+
   // std::cout << peplist1.size() <<std::endl; 
   // for(int i=0 ; i<peplist1.size(); i++)
-  //   std::cout << peplist1[i].seq;
+  //   std::cout << peplist1[i].seq <<std::endl;
   // exit(0);
   }
 
