@@ -451,10 +451,10 @@ int main(int argc, char *argv[]) {
       peplist1.push_back({seq, int(seq.length()), -99.9, int_vec});
     }
     file1.close();
-  std::cout << peplist1.size() <<std::endl; 
+  // std::cout << peplist1.size() <<std::endl; 
   // for(int i=0 ; i<peplist1.size(); i++)
   //   std::cout << peplist1[i].seq;
-  exit(0);
+  // exit(0);
   }
 
   else {
