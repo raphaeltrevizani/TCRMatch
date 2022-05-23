@@ -306,7 +306,7 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
   }
 }
 
-// Move this to outside -> import everything you need
+
 int main(int argc, char *argv[]) {
   int opt;
   int n_threads;
