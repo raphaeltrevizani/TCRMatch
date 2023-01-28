@@ -296,10 +296,10 @@ std::vector<std::string> multi_calc_k3(std::vector<peptide> peplist1, std::vecto
       }
     }
   }
-  std::cout << "input_sequence\tmatch_"
-               "sequence\tscore\treceptor_"
-               "group\tepitope\tantigen\torganism\t"
-            << std::endl;
+//   std::cout << "input_sequence\tmatch_"
+//                "sequence\tscore\treceptor_"
+//                "group\tepitope\tantigen\torganism\t"
+//             << std::endl;
   
 //   std::map<std::string,std::string> mapper;
 //   mapper.insert( {"test", "testA"} );
@@ -429,7 +429,7 @@ int main(int argc, char *argv[]) {
   std::vector<peptide> peplist1;
   std::vector<peptide> peplist2;
   std::vector<std::string> inputlines;  
-
+  std::string trust4header;
   omp_set_num_threads(n_threads);
 
   alphabet = "ARNDCQEGHILKMFPSTWYV";
@@ -458,8 +458,8 @@ int main(int argc, char *argv[]) {
     // text file input
     std::ifstream file1(in_file);
 
-	std::string header;
-    getline(file1, header); // skips header 
+	
+    getline(file1, trust4header); // skips header 
 
     while (getline(file1, line)) {
 	  inputlines.push_back( line );
@@ -556,6 +556,12 @@ int main(int argc, char *argv[]) {
   // Calculate input data vs database with multi-threading
  std::vector<std::string> extended_output;
  std::vector<std::string> tcrmatch_output = multi_calc_k3(peplist1, peplist2, threshold, iedb_map);
+
+  std::cout <<trust4header <<"\t";
+  std::cout << "input_sequence\tmatch_"
+               "sequence\tscore\treceptor_"
+               "group\tepitope\tantigen\torganism\t"
+            << std::endl;
 
   // Appending TCRmatch to Trust4 output
   for( int i = 0; i < inputlines.size(); i++)
