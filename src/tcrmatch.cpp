@@ -11,6 +11,14 @@
 #include <vector>
 #include <algorithm>
 
+std::string get_nth_field( std::string& str, int n ){
+	std::istringstream iss(str);
+	std::string field;
+	for (int i = 0; i <= n; i++)
+		iss >>field;
+	return field;
+}
+
 std::array<std::array<float, 20>, 20> k1;
 int p_kmin = 1;
 int p_kmax = 30;
@@ -256,9 +264,13 @@ float k3_sum(peptide pep1, peptide pep2) {
   return (k3);
 }
 
-void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
+std::vector<std::string> multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
                    float threshold,
-                   std::map<std::string, std::vector<IEDB_data_row>> iedb_map) {
+                   std::map<std::string, std::vector<IEDB_data_row>> iedb_map ) {
+
+	// for( int i = 0; i<trust_input.size(); i++)
+	// 	std::cout << trust_input[i] <<std::endl;
+	// exit(0);
 
   // Simple method to calculate pairwise TCRMatch scores using two peptide
   // vectors
@@ -288,22 +300,43 @@ void multi_calc_k3(std::vector<peptide> peplist1, std::vector<peptide> peplist2,
                "sequence\tscore\treceptor_"
                "group\tepitope\tantigen\torganism\t"
             << std::endl;
+  
+//   std::map<std::string,std::string> mapper;
+//   mapper.insert( {"test", "testA"} );
+  
+//   exit(0);
+  std::vector<std::string> tcrmatch_output;
+
   for (int k = 0; k < omp_get_max_threads(); k++) {
     for (auto &tuple : results[k]) {
       std::string match_peptide = std::get<1>(tuple);
       std::map<std::string, std::vector<IEDB_data_row>>::iterator it =
           iedb_map.find(match_peptide);
       std::vector<IEDB_data_row> match_row_vec = it->second;
-      for (int l = 0; l < match_row_vec.size(); l++) {
+	//   std::cout << match_row_vec.size() 
+      for (int l = 0; l < match_row_vec.size(); l++) { // match_row_vec.size() == 1 every time I test 
+
+		// std::cout<< "test" <<std::endl;
+		// std::cout << match_row_vec[l].original_sequence <<std::endl;
         IEDB_data_row match_row = match_row_vec[l];
-        std::cout << std::fixed << std::setprecision(4) << std::get<0>(tuple)
-                  << "\t" << std::get<1>(tuple) << "\t" << std::get<2>(tuple)
-                  << "\t" << match_row.receptor_group << "\t"
-                  << match_row.epitope << "\t" << match_row.antigen << "\t"
-                  << match_row.organism << std::endl;
+		// std::cout << std::get<0>(tuple) <<std::endl;
+		// exit(0);
+        // std::cout << std::fixed << std::setprecision(4) << std::get<0>(tuple)
+        //           << "\t" << std::get<1>(tuple) << "\t" << std::get<2>(tuple)
+        //           << "\t" << match_row.receptor_group << "\t"
+        //           << match_row.epitope << "\t" << match_row.antigen << "\t"
+        //           << match_row.organism << std::endl;
+		std::string score = std::to_string(std::get<2>(tuple));
+		std::string output_string = std::get<0>(tuple) + "\t" + std::get<1>(tuple) + "\t" + score
+                  + "\t" + match_row.receptor_group + "\t"
+                  + match_row.epitope + "\t" + match_row.antigen + "\t"
+                  + match_row.organism + "\n";
+
+		tcrmatch_output.push_back(output_string);
       }
     }
   }
+  return tcrmatch_output;
 }
 
 
@@ -395,7 +428,8 @@ int main(int argc, char *argv[]) {
   std::string alphabet;
   std::vector<peptide> peplist1;
   std::vector<peptide> peplist2;
-  
+  std::vector<std::string> inputlines;  
+
   omp_set_num_threads(n_threads);
 
   alphabet = "ARNDCQEGHILKMFPSTWYV";
@@ -420,11 +454,15 @@ int main(int argc, char *argv[]) {
   }
 
   else if( trust4flag ){
-
+	
     // text file input
     std::ifstream file1(in_file);
+
     getline(file1, line); // skips header 
+
     while (getline(file1, line)) {
+	  inputlines.push_back( line );
+
       std::istringstream is( line );
       std::string skip;
       is >>skip >>skip >>skip >>seq;  // 4th field contains peptide seq
@@ -515,7 +553,23 @@ int main(int argc, char *argv[]) {
   }
 
   // Calculate input data vs database with multi-threading
-  multi_calc_k3(peplist1, peplist2, threshold, iedb_map);
+ std::vector<std::string> extended_output;
+ std::vector<std::string> tcrmatch_output = multi_calc_k3(peplist1, peplist2, threshold, iedb_map);
+
+  // Appending TCRmatch to Trust4 output
+  for( int i = 0; i < inputlines.size(); i++)
+	for( int j = 0; j < tcrmatch_output.size(); j++) {
+		std::string final_line = inputlines[i] + "\t" + tcrmatch_output[j];
+		std::string AAseq_trust  = get_nth_field(inputlines[i], 3);
+		std::string seq_tcrmatch = get_nth_field(tcrmatch_output[j], 0);
+		// std::cout << (trim(AAseq_trust) == seq_tcrmatch) <<std::endl;
+		if( trim(AAseq_trust) == seq_tcrmatch )
+			extended_output.push_back( final_line );
+	}
+
+
+  for( int i = 0; i < extended_output.size(); i++)
+	std::cout <<extended_output[i];
 
   return 0;
 }
