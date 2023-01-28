@@ -458,7 +458,8 @@ int main(int argc, char *argv[]) {
     // text file input
     std::ifstream file1(in_file);
 
-    getline(file1, line); // skips header 
+	std::string header;
+    getline(file1, header); // skips header 
 
     while (getline(file1, line)) {
 	  inputlines.push_back( line );
